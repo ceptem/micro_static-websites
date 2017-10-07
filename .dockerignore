@@ -1,0 +1,7 @@
+*.swp
+*.swo
+*~
+.git
+.svn
+/do
+/libexec

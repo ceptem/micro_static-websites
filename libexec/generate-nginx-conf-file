@@ -1,0 +1,65 @@
+#!/bin/sh
+
+NAME=${NAME-default}
+
+SERVER_NAMES=${SERVER_NAMES-localhost}
+
+LISTEN_PORTS=${PORTS-80}
+
+# e.g. CHARSET=koi8-r
+CHARSET=
+
+printf "server {\n"
+printf "\tlisten\t\t\t%s;\n" "$LISTEN_PORTS"
+printf "\tserver_name\t\t%s;\n" "$SERVER_NAMES"
+printf "\n"
+if [ "$CHARSET"b != b ]; then
+printf "\tcharset\t\t\t%s;\n" "$CHARSET"
+fi
+printf "\n"
+printf "\taccess_log\t\t/var/log/nginx/%s.access.log  main;\n" "$NAME"
+printf "\n"
+printf "\tlocation / {\n"
+printf "\t\troot\t\t/usr/share/nginx/%s;\n" "$NAME"
+printf "\t\tindex\t\tindex.html index.htm;\n"
+printf "\t}\n"
+printf "\n"
+printf "\t# redirect server error pages to the static page /50x.html\n"
+printf "\t#\n"
+for code in 404 500 502 503 504; do
+    if [ -e "www/$NAME/$code.html" ]; then
+printf "\terror_page\t\t%s  /%s.html;\n" "$code" "$code"
+    elif ((code >= 500 )); then
+        no_page="$code $no_page"
+    fi
+done
+if [ a"$no_page" != a ]; then
+printf "\terror_page\t\t%s /50x.html;\n" "$no_page"
+printf "\tlocation = /50x.html {\n"
+printf "\t\troot\t\t/usr/share/nginx/html;\n"
+printf "\t}\n"
+fi
+printf "\n"
+printf "\t# proxy the PHP scripts to Apache listening on 127.0.0.1:80\n"
+printf "\t#\n"
+printf "\t#location ~ \.php$ {\n"
+printf "\t#\tproxy_pass\thttp://127.0.0.1;\n"
+printf "\t#}\n"
+printf "\n"
+printf "\t# pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000\n"
+printf "\t#\n"
+printf "\t#location ~ \.php$ {\n"
+printf "\t#\troot\t\thtml;\n"
+printf "\t#\tfastcgi_pass\t127.0.0.1:9000;\n"
+printf "\t#\tfastcgi_index\tindex.php;\n"
+printf "\t#\tfastcgi_param\tSCRIPT_FILENAME  /scripts\$fastcgi_script_name;\n"
+printf "\t#\tinclude\t\tfastcgi_params;\n"
+printf "\t#}\n"
+printf "\n"
+printf "\t# deny access to .htaccess files, if Apache's document root\n"
+printf "\t# concurs with nginx's one\n"
+printf "\t#\n"
+printf "\t#location ~ /\.ht {\n"
+printf "\t#\tdeny\t\tall;\n"
+printf "\t#}\n"
+printf "}\n"

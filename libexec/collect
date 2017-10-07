@@ -1,0 +1,38 @@
+#!/bin/sh
+
+SOURCESDIR=www
+
+mkdir -p "$SOURCESDIR"
+
+while IFS=":\n" read NAME TYPE SOURCE SERVER_NAMES OPTIONS; do
+    if printf "%s" "$NAME" | grep '^#'; then
+        continue
+    fi
+    if printf "%s" "$NAME" | grep '^[ \t]*$'; then
+        continue
+    fi
+    if printf "%s" "$SOURCE" | grep '^~'; then
+        SOURCE=`printf "%s" "$SOURCE" | sed "s,^~/,$HOME/,"`
+    fi
+    case "$TYPE" in
+    git)
+        mkdir -p "$SOURCESDIR/$NAME" \
+        && cd "$SOURCESDIR/$NAME" \
+        && {
+            if [ -d .git ]; then
+                git update --rebase
+            else
+                git clone "$SOURCE" .
+            fi
+        } \
+        && cd -
+        ;;
+    dir|directory)
+        mkdir -p "$SOURCESDIR/$NAME" \
+        && cd "$SOURCESDIR/$NAME" \
+        && rsync -avz --delete --force-delete "$SOURCE"/ . \
+        && cd -
+        ;;
+    *)
+    esac
+done < "$1"

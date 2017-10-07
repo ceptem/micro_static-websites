@@ -1,0 +1,19 @@
+#!/bin/sh
+
+mkdir -p conf/conf.d
+rm conf/conf.d/*
+
+while IFS=":\n" read NAME TYPE SOURCE SERVER_NAMES OPTIONS; do
+    if printf "%s" "$NAME" | grep '^#'; then
+        continue
+    fi
+    if printf "%s" "$NAME" | grep '^[ \t]*$'; then
+        continue
+    fi
+    if printf "%s" "$SOURCE" | grep '^~'; then
+        SOURCE=`printf "%s" "$SOURCE" | sed "s,^~/,$HOME/,"`
+    fi
+
+    NAME=$NAME SERVER_NAMES=$SERVER_NAMES libexec/generate-nginx-conf-file > "conf/conf.d/$NAME.conf"
+
+done < "$1"
