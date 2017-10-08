@@ -44,7 +44,7 @@ log() {
 }
 
 cmdl_args=`getopt hVc: $*`
-# you should not use `getopt abo: "$@"` since that would parse
+# you should not use `getopt ... "$@"` since that would parse
 # the arguments differently from what the set command below does.
 if [ $? != 0 ]; then
     usage
@@ -59,16 +59,21 @@ for i; do
     case "$i" in
     -h)
         usage
-        exit 0;;
+        exit 0
+        ;;
     -V)
         printf "$THIS_NAME version $VERSION\n"
-        exit 0;;
+        exit 0
+        ;;
     -c)
         sources_list="$2"
         shift
-        shift;;
+        shift
+        ;;
     --)
-        shift; break;;
+        shift
+        break
+        ;;
     esac
 done
 
